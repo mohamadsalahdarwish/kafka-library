@@ -32,17 +32,18 @@ Update your consumer properties by adding a configuration for the new `test-topi
 
 ```yaml
 test:
-  consumer-group-id: test-topic-consumer
-  # Inherits value-deserializer from common (JsonDeserializer)
-  concurrency-level: 2  # Overrides concurrency-level in properties file
+    consumer-group-id: test-topic-consumer
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    concurrency-level: 2
+    topic-id: test-topic
 ```
 
 For Avro serialization, include the following properties:
 
 ```yaml
 value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-specific-avro-reader-key: specific.avro.reader
-specific-avro-reader: true
+properties:
+    value.specific.avro.reader: true
 ```
 
 ## Step 3: Kafka Listener Configuration
@@ -51,8 +52,8 @@ In the `KafkaListenerConfig` class, add the following bean to handle the new con
 
 ```java
 @Bean
-public ConcurrentKafkaListenerContainerFactory<String, SpecificRecordBase> testKafkaListenerContainerFactory() {
-    return kafkaConsumerConfig.kafkaListenerContainerFactory("test");
+public ConcurrentKafkaListenerContainerFactory<String, String> testKafkaListenerContainerFactory() {
+     return kafkaConsumerConfig.kafkaListenerContainerFactory("test", String.class, String.class);
 }
 ```
 
@@ -61,6 +62,53 @@ public ConcurrentKafkaListenerContainerFactory<String, SpecificRecordBase> testK
 Create a new Kafka consumer class to handle the messages from `test-topic`.
 
 ### `TestKafkaConsumer.java`
+
+```java
+package com.alinma.kafka.demo.producer;
+
+import com.alinma.rib.kafka.producer.service.KafkaProducer;
+import com.alinma.rib.kafka.producer.service.KafkaSendCallback;
+import com.alinma.rib.kafka.producer.service.impl.JsonKafkaProducerImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.kafka.support.SendResult;
+
+@Component
+public class TestProducerExample {
+
+    private final KafkaProducer<String, String> kafkaProducer;
+
+    @Autowired
+    public TestProducerExample(JsonKafkaProducerImpl<String, String> kafkaProducer) {
+        this.kafkaProducer = kafkaProducer;
+    }
+
+    public void send(String key, String message) {
+        kafkaProducer.send("test-topic", key, message, new KafkaSendCallback<String, String>() {
+            @Override
+            public void onSuccess(SendResult<String, String> result) {
+                // Handle success
+                System.out.println("Message sent successfully to 'test-topic' with key: " + key);
+            }
+
+            @Override
+            public void onFailure(Throwable ex) {
+                // Handle failure
+                System.err.println("Failed to send message to 'test-topic' with key: " + key + ", exception: " + ex.getMessage());
+            }
+        });
+    }
+}
+
+```
+
+This consumer listens to `test-topic` and processes the messages received.
+
+## Step 5: Add Producer Configuration
+
+In your Spring Boot application, create a producer class for `test-topic`.
+
+### `TestProducerExample.java`
 
 ```java
 package com.alinma.kafka.demo.consumer;
@@ -73,52 +121,17 @@ import java.util.List;
 public class TestKafkaConsumer {
 
     @KafkaListener(
-        topics = "test-topic",
-        groupId = "${kafka-consumer-config.consumer-groups.test.consumer-group-id}",
-        containerFactory = "testKafkaListenerContainerFactory"
+            topics = "${kafka-consumer-config.consumer-groups.payment.topic-id}",
+            groupId = "${kafka-consumer-config.consumer-groups.test.consumer-group-id}",
+            containerFactory = "testKafkaListenerContainerFactory"
     )
     public void receive(List<String> messages, List<String> keys, List<Integer> partitions, List<Long> offsets) {
         for (int i = 0; i < messages.size(); i++) {
-            System.out.println("Received payment message: " + messages.get(i) +
-                               ", key: " + keys.get(i) +
-                               ", partition: " + partitions.get(i) +
-                               ", offset: " + offsets.get(i));
+            System.out.println("Received Test message: " + messages.get(i) +
+                    ", key: " + keys.get(i) +
+                    ", partition: " + partitions.get(i) +
+                    ", offset: " + offsets.get(i));
         }
-    }
-}
-```
-
-This consumer listens to `test-topic` and processes the messages received.
-
-## Step 5: Add Producer Configuration
-
-In your Spring Boot application, create a producer class for `test-topic`.
-
-### `TestProducerExample.java`
-
-```java
-package com.alinma.kafka.demo.producer;
-
-import com.alinma.rib.kafka.producer.KafkaMessageHelper;
-import com.alinma.rib.kafka.producer.service.KafkaProducer;
-import com.alinma.rib.kafka.producer.service.impl.JsonkafkaProducerImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
-public class TestProducerExample {
-
-    private final KafkaProducer<String, String> kafkaProducer;
-    private final KafkaMessageHelper<String, String> kafkaMessageHelper;
-
-    @Autowired
-    public TestProducerExample(JsonkafkaProducerImpl<String, String> kafkaProducer, KafkaMessageHelper<String, String> kafkaMessageHelper) {
-        this.kafkaProducer = kafkaProducer;
-        this.kafkaMessageHelper = kafkaMessageHelper;
-    }
-
-    public void send(String key, String message) {
-        kafkaProducer.send("test-topic", key, message, kafkaMessageHelper.getCallback("payment-topic", key, message));
     }
 }
 ```
