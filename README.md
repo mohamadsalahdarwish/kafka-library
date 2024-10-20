@@ -74,7 +74,7 @@ public class TestKafkaConsumer {
 
     @KafkaListener(
         topics = "test-topic",
-        groupId = "${kafka-consumer-config.consumer-groups.payment.test-group-id}",
+        groupId = "${kafka-consumer-config.consumer-groups.test.consumer-group-id}",
         containerFactory = "testKafkaListenerContainerFactory"
     )
     public void receive(List<String> messages, List<String> keys, List<Integer> partitions, List<Long> offsets) {
