@@ -1,5 +1,5 @@
 0
-175
+178
 _confluent-controlcenter-5-4-0-1-aggregatedTopicPartitionTableWindows-ONE_MINUTE-changelog 0 0
 __consumer_offsets 13 0
 __consumer_offsets 46 0
@@ -9,6 +9,7 @@ _confluent-controlcenter-5-4-0-1-MonitoringMessageAggregatorWindows-ONE_MINUTE-r
 _confluent-controlcenter-5-4-0-1-TriggerEventsStore-changelog 2 0
 __consumer_offsets 21 0
 _confluent-controlcenter-5-4-0-1-KSTREAM-OUTERTHIS-0000000104-store-changelog 1 0
+test-topic 2 0
 _confluent-controlcenter-5-4-0-1-MetricsAggregateStore-repartition 2 0
 __consumer_offsets 30 0
 _confluent-controlcenter-5-4-0-1-KSTREAM-OUTEROTHER-0000000105-store-changelog 1 0
@@ -30,8 +31,9 @@ _confluent-controlcenter-5-4-0-1-MonitoringStream-ONE_MINUTE-changelog 0 0
 _confluent-controlcenter-5-4-0-1-TriggerEventsStore-changelog 1 0
 _confluent-controlcenter-5-4-0-1-KSTREAM-OUTERTHIS-0000000104-store-changelog 0 0
 __consumer_offsets 20 0
-__consumer_offsets 29 5
+__consumer_offsets 29 0
 _confluent-controlcenter-5-4-0-1-MetricsAggregateStore-changelog 0 0
+test-topic 1 0
 _confluent-controlcenter-5-4-0-1-MetricsAggregateStore-repartition 1 0
 _confluent-controlcenter-5-4-0-1-KSTREAM-OUTEROTHER-0000000105-store-changelog 0 0
 _confluent-controlcenter-5-4-0-1-group-stream-extension-rekey 0 0
@@ -106,7 +108,7 @@ __consumer_offsets 34 0
 _confluent-controlcenter-5-4-0-1-MonitoringStream-THREE_HOURS-changelog 1 0
 _confluent-controlcenter-5-4-0-1-monitoring-trigger-event-rekey 1 0
 __consumer_offsets 16 0
-_schemas 0 3
+_schemas 0 0
 _confluent-controlcenter-5-4-0-1-MonitoringStream-THREE_HOURS-repartition 0 0
 __consumer_offsets 41 0
 _confluent-controlcenter-5-4-0-1-metrics-trigger-measurement-rekey 1 0
@@ -141,6 +143,7 @@ _confluent-controlcenter-5-4-0-1-MonitoringStream-ONE_MINUTE-changelog 1 0
 __consumer_offsets 19 0
 _confluent-controlcenter-5-4-0-1-monitoring-message-rekey-store 1 0
 payment-topic 2 0
+test-topic 0 0
 _confluent-controlcenter-5-4-0-1-MetricsAggregateStore-repartition 0 0
 __consumer_offsets 28 0
 _confluent-controlcenter-5-4-0-1-group-aggregate-store-ONE_MINUTE-changelog 0 0

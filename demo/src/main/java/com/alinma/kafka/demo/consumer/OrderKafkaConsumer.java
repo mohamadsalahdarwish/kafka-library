@@ -1,10 +1,9 @@
-// OrderKafkaConsumer.java
-
 package com.alinma.kafka.demo.consumer;
 
 import com.alinma.rib.kafka.order.avro.model.Product;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,14 +12,19 @@ import java.util.List;
 public class OrderKafkaConsumer {
 
     @KafkaListener(
-            topics = "${kafka-consumer-config.consumer-groups.order.topic-id}",//"order-topic",
+            topics = "${kafka-consumer-config.consumer-groups.order.topic-id}",
             groupId = "${kafka-consumer-config.consumer-groups.order.consumer-group-id}",
             containerFactory = "orderKafkaListenerContainerFactory"
     )
-    public void receive(List<SpecificRecordBase> messages, List<Product> keys, List<Integer> partitions, List<Long> offsets) {
+    public void receiveMessages(
+            List<Product> messages,
+            @Header(KafkaHeaders.RECEIVED_KEY) List<String> keys
+    ) {
         for (int i = 0; i < messages.size(); i++) {
-            System.out.println("Received order message: " + ((Product)messages.get(i)).getQuantity());
-            System.out.println("Received order message with Key: " + keys.get(i).getId());
+            Product product = messages.get(i);
+            String key = keys.get(i);
+            System.out.printf("Received order message: %s%n", product.getQuantity());
+            System.out.printf("Received order message with Key: %s%n", key);
         }
     }
 }

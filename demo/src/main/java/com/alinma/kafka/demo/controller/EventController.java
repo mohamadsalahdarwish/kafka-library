@@ -3,6 +3,7 @@ package com.alinma.kafka.demo.controller;
 
 import com.alinma.kafka.demo.producer.OrderProducerExample;
 import com.alinma.kafka.demo.producer.PaymentProducerExample;
+import com.alinma.kafka.demo.producer.TestProducerExample;
 import com.alinma.rib.kafka.order.avro.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,9 @@ public class EventController {
     @Autowired
     OrderProducerExample orderProducerExample;
 
+    @Autowired
+    TestProducerExample testProducerExample;
+
     @GetMapping("/events")
     public void sendMessage() {
 
@@ -27,6 +31,9 @@ public class EventController {
 
 
         orderProducerExample.sendOrderMessage("test2", product);
+
+        testProducerExample.send("test1", "test1");
+
     }
 
 }

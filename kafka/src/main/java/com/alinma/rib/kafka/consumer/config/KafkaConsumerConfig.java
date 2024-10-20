@@ -4,36 +4,32 @@ import com.alinma.rib.kafka.config.data.KafkaConfigData;
 import com.alinma.rib.kafka.config.data.KafkaConsumerConfigData;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class KafkaConsumerConfig<K extends Serializable, V> {
+public class KafkaConsumerConfig {
 
     private final KafkaConfigData kafkaConfigData;
-    private final KafkaConsumerConfigData kafkaConsumerConfigData;
+    private final KafkaConsumerConfigData consumerConfigData;
 
     public KafkaConsumerConfig(KafkaConfigData kafkaConfigData,
-                               KafkaConsumerConfigData kafkaConsumerConfigData) {
+                               KafkaConsumerConfigData consumerConfigData) {
         this.kafkaConfigData = kafkaConfigData;
-        this.kafkaConsumerConfigData = kafkaConsumerConfigData;
+        this.consumerConfigData = consumerConfigData;
     }
 
-    private Map<String, Object> commonConsumerConfigs() {
+    private Map<String, Object> getCommonConfigs() {
+        KafkaConsumerConfigData.CommonConfig common = consumerConfigData.getCommon();
         Map<String, Object> props = new HashMap<>();
-        KafkaConsumerConfigData.CommonConfig common = kafkaConsumerConfigData.getCommon();
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigData.getBootstrapServers());
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, common.getKeyDeserializer());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, common.getAutoOffsetReset());
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, common.getSessionTimeoutMs());
         props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, common.getHeartbeatIntervalMs());
@@ -41,74 +37,74 @@ public class KafkaConsumerConfig<K extends Serializable, V> {
         props.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG,
                 common.getMaxPartitionFetchBytesDefault() * common.getMaxPartitionFetchBytesBoostFactor());
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, common.getMaxPollRecords());
+
+        String schemaRegistryUrlKey = kafkaConfigData.getSchemaRegistryUrlKey();
+        String schemaRegistryUrl = kafkaConfigData.getSchemaRegistryUrl();
+        if (schemaRegistryUrlKey != null && schemaRegistryUrl != null) {
+            props.put(schemaRegistryUrlKey, schemaRegistryUrl);
+        }
+
         return props;
     }
 
-    private Map<String, Object> consumerConfigs(String consumerGroup) {
-        Map<String, Object> props = new HashMap<>(commonConsumerConfigs());
-        KafkaConsumerConfigData.CommonConfig common = kafkaConsumerConfigData.getCommon();
-        KafkaConsumerConfigData.ConsumerGroupConfig groupConfig = kafkaConsumerConfigData.getConsumerGroups().get(consumerGroup);
+    private Map<String, Object> getConsumerConfigs(String groupId) {
+        Map<String, Object> props = new HashMap<>(getCommonConfigs());
+        KafkaConsumerConfigData.ConsumerGroupConfig groupConfig = consumerConfigData.getConsumerGroups().get(groupId);
 
-        // Apply common value deserializer
-        String valueDeserializer = common.getValueDeserializer();
+        if (groupConfig != null) {
+            String keyDeserializer = groupConfig.getKeyDeserializer() != null
+                    ? groupConfig.getKeyDeserializer()
+                    : consumerConfigData.getCommon().getKeyDeserializer();
+            props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
 
-        // Override if specific value deserializer is provided for the consumer group
-        if (groupConfig.getValueDeserializer() != null) {
-            valueDeserializer = groupConfig.getValueDeserializer();
+            String valueDeserializer = groupConfig.getValueDeserializer() != null
+                    ? groupConfig.getValueDeserializer()
+                    : consumerConfigData.getCommon().getValueDeserializer();
+            props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
+
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, groupConfig.getConsumerGroupId());
+
+            if (groupConfig.getProperties() != null) {
+                props.putAll(groupConfig.getProperties());
+            }
+
+            handleJsonAndAvroDeserializer(props, valueDeserializer);
         }
 
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
+        return props;
+    }
 
-        // Special handling for JSON deserializer
-        if (valueDeserializer.equals(JsonDeserializer.class.getName())) {
+    private void handleJsonAndAvroDeserializer(Map<String, Object> props, String valueDeserializer) {
+        if (JsonDeserializer.class.getName().equals(valueDeserializer)) {
             props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-            // Wrap with ErrorHandlingDeserializer
-            props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
-            props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
+            props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class.getName());
+            props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
+        } else if ("io.confluent.kafka.serializers.KafkaAvroDeserializer".equals(valueDeserializer)) {
+            props.put("specific.avro.reader", true); // Ensure Avro specific reader is enabled
         }
-
-        // Add group-specific configurations
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupConfig.getConsumerGroupId());
-
-        if (groupConfig.getSpecificAvroReaderKey() != null && groupConfig.getSpecificAvroReader() != null) {
-            props.put(groupConfig.getSpecificAvroReaderKey(), groupConfig.getSpecificAvroReader());
-        }
-
-        if (kafkaConfigData.getSchemaRegistryUrlKey() != null && kafkaConfigData.getSchemaRegistryUrl() != null) {
-            props.put(kafkaConfigData.getSchemaRegistryUrlKey(), kafkaConfigData.getSchemaRegistryUrl());
-        }
-
-        return props;
     }
 
-    @Bean
-    @Lazy
-    public <T> ConcurrentKafkaListenerContainerFactory<K, T> kafkaListenerContainerFactory() {
-        return new ConcurrentKafkaListenerContainerFactory<>();
-    }
+    public <K, V> ConcurrentKafkaListenerContainerFactory<K, V> kafkaListenerContainerFactory(
+            String groupId, Class<K> keyClass, Class<V> valueClass) {
 
-    @Lazy
-    public <T> ConcurrentKafkaListenerContainerFactory<K, T> kafkaListenerContainerFactory(String consumerGroup) {
-        KafkaConsumerConfigData.CommonConfig common = kafkaConsumerConfigData.getCommon();
-        KafkaConsumerConfigData.ConsumerGroupConfig groupConfig = kafkaConsumerConfigData.getConsumerGroups().get(consumerGroup);
+        Map<String, Object> configs = getConsumerConfigs(groupId);
+        ConsumerFactory<K, V> consumerFactory = new DefaultKafkaConsumerFactory<>(configs);
 
-        ConcurrentKafkaListenerContainerFactory<K, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory(consumerGroup));
-        factory.setBatchListener(common.getBatchListener());
-        factory.setAutoStartup(common.getAutoStartup());
+        ConcurrentKafkaListenerContainerFactory<K, V> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
 
-        // Determine concurrency level (override if specified in group config)
-        int concurrencyLevel = groupConfig.getConcurrencyLevel() != null
+        KafkaConsumerConfigData.CommonConfig common = consumerConfigData.getCommon();
+        KafkaConsumerConfigData.ConsumerGroupConfig groupConfig = consumerConfigData.getConsumerGroups().get(groupId);
+
+        factory.setAutoStartup(common.isAutoStartup());
+        factory.setBatchListener(common.isBatchListener());
+        factory.getContainerProperties().setPollTimeout(common.getPollTimeoutMs());
+
+        int concurrencyLevel = (groupConfig != null && groupConfig.getConcurrencyLevel() != null)
                 ? groupConfig.getConcurrencyLevel()
                 : common.getConcurrencyLevel();
         factory.setConcurrency(concurrencyLevel);
 
-        factory.getContainerProperties().setPollTimeout(common.getPollTimeoutMs());
         return factory;
-    }
-
-    private <T> ConsumerFactory<K, T> consumerFactory(String consumerGroup) {
-        Map<String, Object> configs = consumerConfigs(consumerGroup);
-        return new DefaultKafkaConsumerFactory<>(configs);
     }
 }

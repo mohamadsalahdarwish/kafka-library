@@ -1,5 +1,3 @@
-// PaymentKafkaConsumer.java
-
 package com.alinma.kafka.demo.consumer;
 
 import org.springframework.kafka.annotation.KafkaListener;
@@ -12,7 +10,7 @@ public class PaymentKafkaConsumer {
 
 
     @KafkaListener(
-            topics = "payment-topic",
+            topics = "${kafka-consumer-config.consumer-groups.payment.topic-id}",
             groupId = "${kafka-consumer-config.consumer-groups.payment.consumer-group-id}",
             containerFactory = "paymentKafkaListenerContainerFactory"
     )
