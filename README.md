@@ -64,6 +64,40 @@ Create a new Kafka consumer class to handle the messages from `test-topic`.
 ### `TestKafkaConsumer.java`
 
 ```java
+package com.alinma.kafka.demo.consumer;
+
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class TestKafkaConsumer {
+
+    @KafkaListener(
+            topics = "${kafka-consumer-config.consumer-groups.payment.topic-id}",
+            groupId = "${kafka-consumer-config.consumer-groups.test.consumer-group-id}",
+            containerFactory = "testKafkaListenerContainerFactory"
+    )
+    public void receive(List<String> messages, List<String> keys, List<Integer> partitions, List<Long> offsets) {
+        for (int i = 0; i < messages.size(); i++) {
+            System.out.println("Received Test message: " + messages.get(i) +
+                    ", key: " + keys.get(i) +
+                    ", partition: " + partitions.get(i) +
+                    ", offset: " + offsets.get(i));
+        }
+    }
+}
+```
+
+This consumer listens to `test-topic` and processes the messages received.
+
+## Step 5: Add Producer Configuration
+
+In your Spring Boot application, create a producer class for `test-topic`.
+
+### `TestProducerExample.java`
+
+```java
 package com.alinma.kafka.demo.producer;
 
 import com.alinma.rib.kafka.producer.service.KafkaProducer;
@@ -100,40 +134,6 @@ public class TestProducerExample {
     }
 }
 
-```
-
-This consumer listens to `test-topic` and processes the messages received.
-
-## Step 5: Add Producer Configuration
-
-In your Spring Boot application, create a producer class for `test-topic`.
-
-### `TestProducerExample.java`
-
-```java
-package com.alinma.kafka.demo.consumer;
-
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
-import java.util.List;
-
-@Service
-public class TestKafkaConsumer {
-
-    @KafkaListener(
-            topics = "${kafka-consumer-config.consumer-groups.payment.topic-id}",
-            groupId = "${kafka-consumer-config.consumer-groups.test.consumer-group-id}",
-            containerFactory = "testKafkaListenerContainerFactory"
-    )
-    public void receive(List<String> messages, List<String> keys, List<Integer> partitions, List<Long> offsets) {
-        for (int i = 0; i < messages.size(); i++) {
-            System.out.println("Received Test message: " + messages.get(i) +
-                    ", key: " + keys.get(i) +
-                    ", partition: " + partitions.get(i) +
-                    ", offset: " + offsets.get(i));
-        }
-    }
-}
 ```
 
 This producer sends messages to the `test-topic`.
