@@ -31,19 +31,19 @@ This ensures that the necessary topics are available for the consumer and produc
 Update your consumer properties by adding a configuration for the new `test-topic`:
 
 ```yaml
-    test:
-      consumer-group-id: test-topic-consumer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      concurrency-level: 2
-      topic-id: test-topic
+test:
+    consumer-group-id: test-topic-consumer
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    concurrency-level: 2
+    topic-id: test-topic
 ```
 
 For Avro serialization, include the following properties:
 
 ```yaml
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      properties:
-        value.specific.avro.reader: true
+value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+properties:
+    value.specific.avro.reader: true
 ```
 
 ## Step 3: Kafka Listener Configuration
@@ -51,10 +51,10 @@ For Avro serialization, include the following properties:
 In the `KafkaListenerConfig` class, add the following bean to handle the new consumer:
 
 ```java
-   @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> testKafkaListenerContainerFactory() {
-        return kafkaConsumerConfig.kafkaListenerContainerFactory("test", String.class, String.class);
-    }
+@Bean
+public ConcurrentKafkaListenerContainerFactory<String, String> testKafkaListenerContainerFactory() {
+     return kafkaConsumerConfig.kafkaListenerContainerFactory("test", String.class, String.class);
+}
 ```
 
 ## Step 4: Create Consumer Class
