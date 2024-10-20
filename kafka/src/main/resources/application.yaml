@@ -13,7 +13,7 @@ kafka-producer-config:
     batch-size: 16384
     batch-size-boost-factor: 100
     linger-ms: 5
-    request-timeout-ms: 60000
+    request-timeout-ms: 120000
     retry-count: 5
   avro:
     value-serializer-class: io.confluent.kafka.serializers.KafkaAvroSerializer
@@ -53,7 +53,7 @@ kafka-consumer-config:
       concurrency-level: 2
       topic-id: test-topic
     msd:
-      consumer-group-id: test-topic-consumer
+      consumer-group-id: msd-topic-consumer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       concurrency-level: 2
       topic-id: msd-topic

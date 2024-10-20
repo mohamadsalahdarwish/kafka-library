@@ -14,7 +14,7 @@ public class MsdKafkaConsumer {
     )
     public void receive(List<String> messages, List<String> keys, List<Integer> partitions, List<Long> offsets) {
         for (int i = 0; i < messages.size(); i++) {
-            System.out.println("Received Test message: " + messages.get(i) +
+            System.out.println("Received msd message: " + messages.get(i) +
                     ", key: " + keys.get(i) );
         }
     }
