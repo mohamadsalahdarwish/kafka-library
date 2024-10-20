@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.kafka.support.SendResult;
 
-import java.util.concurrent.CompletableFuture;
-
 @Component
 public class TestProducerExample {
 
