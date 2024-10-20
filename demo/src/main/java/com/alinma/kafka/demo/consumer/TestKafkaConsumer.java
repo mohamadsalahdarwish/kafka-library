@@ -12,12 +12,10 @@ public class TestKafkaConsumer {
             groupId = "${kafka-consumer-config.consumer-groups.test.consumer-group-id}",
             containerFactory = "testKafkaListenerContainerFactory"
     )
-    public void receive(List<String> messages, List<String> keys, List<Integer> partitions, List<Long> offsets) {
+    public void receive(List<String> messages, List<String> keys) {
         for (int i = 0; i < messages.size(); i++) {
             System.out.println("Received Test message: " + messages.get(i) +
-                    ", key: " + keys.get(i) +
-                    ", partition: " + partitions.get(i) +
-                    ", offset: " + offsets.get(i));
+                    ", key: " + keys.get(i));
         }
     }
 }

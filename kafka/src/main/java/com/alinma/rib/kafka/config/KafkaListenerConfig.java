@@ -29,4 +29,9 @@ public class KafkaListenerConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> testKafkaListenerContainerFactory() {
         return kafkaConsumerConfig.kafkaListenerContainerFactory("test", String.class, String.class);
     }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> msdKafkaListenerContainerFactory() {
+        return kafkaConsumerConfig.kafkaListenerContainerFactory("msd", String.class, String.class);
+    }
 }

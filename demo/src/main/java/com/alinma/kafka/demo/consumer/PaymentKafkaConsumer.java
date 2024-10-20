@@ -17,9 +17,7 @@ public class PaymentKafkaConsumer {
     public void receive(List<String> messages, List<String> keys, List<Integer> partitions, List<Long> offsets) {
         for (int i = 0; i < messages.size(); i++) {
             System.out.println("Received payment message: " + messages.get(i) +
-                    ", key: " + keys.get(i) +
-                    ", partition: " + partitions.get(i) +
-                    ", offset: " + offsets.get(i));
+                    ", key: " + keys.get(i));
         }
     }
 }

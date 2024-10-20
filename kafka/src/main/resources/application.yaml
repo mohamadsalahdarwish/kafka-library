@@ -52,5 +52,10 @@ kafka-consumer-config:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       concurrency-level: 2
       topic-id: test-topic
+    msd:
+      consumer-group-id: test-topic-consumer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      concurrency-level: 2
+      topic-id: msd-topic
 
 

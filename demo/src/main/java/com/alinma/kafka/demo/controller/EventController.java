@@ -1,6 +1,7 @@
 package com.alinma.kafka.demo.controller;
 
 
+import com.alinma.kafka.demo.producer.MsdKafkaProducer;
 import com.alinma.kafka.demo.producer.OrderProducerExample;
 import com.alinma.kafka.demo.producer.PaymentProducerExample;
 import com.alinma.kafka.demo.producer.TestProducerExample;
@@ -22,6 +23,9 @@ public class EventController {
     @Autowired
     TestProducerExample testProducerExample;
 
+    @Autowired
+    MsdKafkaProducer msdKafkaProducer;
+
     @GetMapping("/events")
     public void sendMessage() {
 
@@ -33,6 +37,8 @@ public class EventController {
         orderProducerExample.sendOrderMessage("test2", product);
 
         testProducerExample.send("test1", "test1");
+
+        msdKafkaProducer.send("msd", "msd");
 
     }
 
