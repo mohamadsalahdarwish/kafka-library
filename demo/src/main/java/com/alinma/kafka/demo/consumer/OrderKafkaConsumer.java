@@ -1,6 +1,6 @@
 package com.alinma.kafka.demo.consumer;
 
-import com.alinma.rib.kafka.order.avro.model.Product;
+import com.alinma.kafka.demo.model.Product;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.kafka.support.KafkaHeaders;

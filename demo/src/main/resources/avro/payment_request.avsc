@@ -1,7 +1,7 @@
 {
-    "namespace": "com.alinma.rib.kafka.order.avro.model",
+    "namespace": "com.alinma.kafka.demo.model",
     "type": "record",
-    "name": "RestaurantApprovalRequestAvroModel",
+    "name": "PaymentRequestAvroModel",
     "fields": [
         {
             "name": "id",
@@ -18,7 +18,7 @@
             }
         },
         {
-            "name": "restaurantId",
+            "name": "customerId",
             "type": {
                 "type": "string",
                 "logicalType": "uuid"
@@ -29,28 +29,6 @@
             "type": {
                 "type": "string",
                 "logicalType": "uuid"
-            }
-        },
-        {
-            "name": "restaurantOrderStatus",
-            "type": {
-                  "type": "enum",
-                  "name": "RestaurantOrderStatus",
-                  "symbols": ["PAID"]
-            }
-        },
-        {
-            "name": "products",
-            "type": {
-                "type": "array",
-                "items":{
-                  "name":"Product",
-                  "type":"record",
-                  "fields":[
-                    {"name":"id", "type": "string", "logicalType": "uuid"},
-                    {"name":"quantity", "type": "int"}
-                   ]
-               }
             }
         },
         {
@@ -68,6 +46,14 @@
                 "type": "long",
                 "logicalType": "timestamp-millis"
             }
+        },
+        {
+            "name": "paymentOrderStatus",
+            "type": {
+                  "type": "enum",
+                  "name": "PaymentOrderStatus",
+                  "symbols": ["PENDING", "CANCELLED"]
+               }
         }
     ]
 }

@@ -17,14 +17,13 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EmbeddedKafka(partitions = 1, brokerProperties = {
@@ -70,7 +69,7 @@ public class MsdControllerIntegrationTest {
         assertEquals(1, records.count(), "Expected one record to be consumed from the topic");
 
         records.forEach(record -> {
-            assertEquals("msd", record.key().toString(), "Expected key to be 'msd'");
+            assertEquals("msd", record.key(), "Expected key to be 'msd'");
             assertEquals("msd", record.value().replace("\"", ""), "Expected value to be 'msd'");
         });
     }

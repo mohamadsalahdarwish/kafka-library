@@ -13,13 +13,15 @@ services:
       kafka-topics --bootstrap-server kafka-broker-1:9092 --topic order-topic --delete --if-exists
       kafka-topics --bootstrap-server kafka-broker-1:9092 --topic test-topic --delete --if-exists
       kafka-topics --bootstrap-server kafka-broker-1:9092 --topic msd-topic --delete --if-exists
-
+       kafka-topics --bootstrap-server kafka-broker-1:9092 --topic xyz-topic --delete --if-exists
 
       echo -e 'Creating kafka topics'
       kafka-topics --bootstrap-server kafka-broker-1:9092 --create --if-not-exists --topic payment-topic --replication-factor 3 --partitions 3
       kafka-topics --bootstrap-server kafka-broker-1:9092 --create --if-not-exists --topic order-topic --replication-factor 3 --partitions 3
       kafka-topics --bootstrap-server kafka-broker-1:9092 --create --if-not-exists --topic test-topic --replication-factor 3 --partitions 3
       kafka-topics --bootstrap-server kafka-broker-1:9092 --create --if-not-exists --topic msd-topic --replication-factor 3 --partitions 3
+            kafka-topics --bootstrap-server kafka-broker-1:9092 --create --if-not-exists --topic xyz-topic --replication-factor 3 --partitions 3
+
 
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka-broker-1:9092 --list

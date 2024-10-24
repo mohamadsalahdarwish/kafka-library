@@ -1,5 +1,5 @@
 {
-    "namespace": "com.alinma.rib.kafka.order.avro.model",
+    "namespace": "com.alinma.kafka.demo.model",
     "type": "record",
     "name": "RestaurantApprovalResponseAvroModel",
     "fields": [

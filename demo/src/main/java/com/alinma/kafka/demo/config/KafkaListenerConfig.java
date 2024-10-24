@@ -1,7 +1,7 @@
-package com.alinma.rib.kafka.config;
+package com.alinma.kafka.demo.config;
 
+import com.alinma.kafka.demo.model.Product;
 import com.alinma.rib.kafka.consumer.config.KafkaConsumerConfig;
-import com.alinma.rib.kafka.order.avro.model.Product;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -33,5 +33,10 @@ public class KafkaListenerConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> msdKafkaListenerContainerFactory() {
         return kafkaConsumerConfig.kafkaListenerContainerFactory("msd", String.class, String.class);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> xyzKafkaListenerContainerFactory() {
+        return kafkaConsumerConfig.kafkaListenerContainerFactory("xyz", String.class, String.class);
     }
 }
